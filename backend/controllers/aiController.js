@@ -139,7 +139,7 @@ const getInsights = async (req, res) => {
       '- Be specific to the numbers provided, not generic',
     ].join('\n');
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const geminiRes = await axios.post(
       geminiUrl,
@@ -247,7 +247,7 @@ const chatWithAI = async (req, res) => {
       '4. Maintain a helpful and polite tone.'
     ].join('\n');
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const geminiRes = await axios.post(geminiUrl, {
       systemInstruction: { parts: [{ text: systemPrompt }] },
