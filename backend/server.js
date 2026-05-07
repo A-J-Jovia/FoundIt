@@ -34,6 +34,10 @@ app.use('/api/stats', require('./routes/statsRoutes'));
 // TEMPORARY SETUP ROUTE - Trigger this once to create DB tables and Admin user
 app.get('/api/setup', async (req, res) => {
   try {
+    const { pool } = require('./db');
+    console.log('Enabling PostGIS extension...');
+    await pool.query('CREATE EXTENSION IF NOT EXISTS postgis;');
+
     const { execSync } = require('child_process');
     execSync('npx drizzle-kit push', { stdio: 'inherit' });
     
@@ -41,7 +45,6 @@ app.get('/api/setup', async (req, res) => {
     const { drizzle } = require('drizzle-orm/node-postgres');
     const { eq } = require('drizzle-orm');
     const { users } = require('./db/schema');
-    const { pool } = require('./db');
     
     const db = drizzle(pool);
     const email = 'jovia@gmail.com';
