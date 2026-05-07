@@ -31,6 +31,44 @@ app.use('/api/items', require('./routes/itemRoutes'));
 app.use('/api/ai',    require('./routes/aiRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
 
+// TEMPORARY SETUP ROUTE - Trigger this once to create DB tables and Admin user
+app.get('/api/setup', async (req, res) => {
+  try {
+    const { execSync } = require('child_process');
+    execSync('npx drizzle-kit push', { stdio: 'inherit' });
+    
+    const bcrypt = require('bcryptjs');
+    const { drizzle } = require('drizzle-orm/node-postgres');
+    const { eq } = require('drizzle-orm');
+    const { users } = require('./db/schema');
+    const { pool } = require('./db');
+    
+    const db = drizzle(pool);
+    const email = 'jovia@gmail.com';
+    const password = 'jovia123';
+    
+    const existingUser = await db.select().from(users).where(eq(users.email, email));
+    
+    if (existingUser.length > 0) {
+      await db.update(users).set({ role: 'admin' }).where(eq(users.email, email));
+      return res.send('DB Tables created! User existed and is now an admin.');
+    } else {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      await db.insert(users).values({
+        name: 'Jovia',
+        email: email,
+        password: hashedPassword,
+        role: 'admin'
+      });
+      return res.send('DB Tables created! New admin user created successfully.');
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Setup failed: ' + err.message);
+  }
+});
+
 // Basic route for testing
 app.get('/', (req, res) => {
   res.send('Digital Lost and Found API is running...');
